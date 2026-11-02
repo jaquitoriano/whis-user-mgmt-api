@@ -26,6 +26,17 @@ uvicorn app.main:app --reload
 
 API docs: `http://127.0.0.1:8000/docs`
 
+## Deploy on Vercel
+
+Set these environment variables in the Vercel project:
+
+- `DATABASE_URL`: PostgreSQL connection string reachable from Vercel, including SSL-compatible credentials.
+- `JWT_SECRET`: a random value of at least 32 characters.
+- `COOKIE_SECURE=true` for production HTTPS deployments.
+- `CORS_ORIGINS`: a JSON array of allowed origins, for example `["https://example.com"]`.
+
+Apply [sql/001_user_management.sql](sql/001_user_management.sql) to the hosted PostgreSQL database before testing the API. Vercel sends requests through `/api/index.py`, which exports this FastAPI application.
+
 ## Main endpoints
 
 - `POST /api/auth/signup`
