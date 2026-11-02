@@ -29,3 +29,6 @@ testpaths = ["tests"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["app"]
+
+[tool.vercel]
+entrypoint = "app.main:app"

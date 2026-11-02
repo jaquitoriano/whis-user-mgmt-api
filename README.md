@@ -35,7 +35,7 @@ Set these environment variables in the Vercel project:
 - `COOKIE_SECURE=true` for production HTTPS deployments.
 - `CORS_ORIGINS`: a JSON array of allowed origins, for example `["https://example.com"]`.
 
-Apply [sql/001_user_management.sql](sql/001_user_management.sql) to the hosted PostgreSQL database before testing the API. Vercel sends requests through `/api/index.py`, which exports this FastAPI application.
+Apply [sql/001_user_management.sql](sql/001_user_management.sql) to the hosted PostgreSQL database before testing the API. Vercel loads the application from the `app.main:app` entrypoint configured in `pyproject.toml`.
 
 ## Main endpoints
 
