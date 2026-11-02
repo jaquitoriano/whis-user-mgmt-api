@@ -10,7 +10,7 @@ router = APIRouter(prefix="/api/jobs", tags=["Jobs"])
 @router.post("")
 async def enqueue(payload: JobRequest, session: dict = Depends(get_current_session)):
     job_id = await get_pool().fetchval(
-        "SELECT queue.enqueue($1, $2::jsonb, COALESCE($3::timestamptz, now()), $4)",
+        "SELECT app_queue.enqueue($1, $2::jsonb, COALESCE($3::timestamptz, now()), $4)",
         payload.job_type, payload.payload, payload.run_at, payload.max_attempts
     )
     return {"id": str(job_id), "status": "queued"}
@@ -19,7 +19,7 @@ async def enqueue(payload: JobRequest, session: dict = Depends(get_current_sessi
 @router.get("/status")
 async def status(job_id: str, session: dict = Depends(get_current_session)):
     job = await get_pool().fetchrow(
-        "SELECT id, job_type, status, attempts, last_error, created_at, updated_at FROM queue.jobs WHERE id=$1::uuid",
+        "SELECT id, job_type, status, attempts, last_error, created_at, updated_at FROM app_queue.jobs WHERE id=$1::uuid",
         job_id
     )
     if job is None:

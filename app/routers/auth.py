@@ -11,7 +11,7 @@ router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 @router.post("/signup", status_code=201)
 async def signup(payload: SignUpRequest):
     result = await get_pool().fetchval(
-        "SELECT auth.sign_up($1, $2, $3)", str(payload.email), payload.password, payload.display_name
+        "SELECT app_auth.sign_up($1, $2, $3)", str(payload.email), payload.password, payload.display_name
     )
     if result.get("error"):
         raise HTTPException(status_code=409, detail={"code": "SIGNUP_FAILED", "message": result["error"]})
@@ -21,7 +21,7 @@ async def signup(payload: SignUpRequest):
 @router.post("/login")
 async def login(payload: LoginRequest, response: Response, request: Request):
     result = await get_pool().fetchval(
-        "SELECT auth.sign_in($1, $2, $3::inet, $4)",
+        "SELECT app_auth.sign_in($1, $2, $3::inet, $4)",
         str(payload.email), payload.password, request.client.host if request.client else None, request.headers.get("user-agent")
     )
     if result.get("error"):
@@ -36,14 +36,14 @@ async def login(payload: LoginRequest, response: Response, request: Request):
 @router.post("/logout")
 async def logout(response: Response, user_session: str | None = Cookie(default=None)):
     if user_session:
-        await get_pool().fetchval("SELECT auth.logout($1)", user_session)
+        await get_pool().fetchval("SELECT app_auth.logout($1)", user_session)
     response.delete_cookie("user_session", path="/")
     return {"success": True}
 
 
 @router.post("/mfa/verify")
 async def verify_mfa(payload: MfaVerifyRequest):
-    result = await get_pool().fetchval("SELECT auth.verify_mfa($1::uuid, $2)", str(payload.user_id), payload.code)
+    result = await get_pool().fetchval("SELECT app_auth.verify_mfa($1::uuid, $2)", str(payload.user_id), payload.code)
     if not result.get("verified"):
         raise HTTPException(status_code=400, detail={"code": "MFA_NOT_READY", "message": result["message"]})
     return result
@@ -51,7 +51,7 @@ async def verify_mfa(payload: MfaVerifyRequest):
 
 @router.post("/reset-password")
 async def reset_password(payload: ResetPasswordRequest):
-    result = await get_pool().fetchval("SELECT auth.reset_password($1, $2)", payload.token, payload.password)
+    result = await get_pool().fetchval("SELECT app_auth.reset_password($1, $2)", payload.token, payload.password)
     if result.get("error"):
         raise HTTPException(status_code=400, detail={"code": "RESET_FAILED", "message": result["error"]})
     return result
